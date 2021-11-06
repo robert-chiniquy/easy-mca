@@ -32,6 +32,7 @@
     "svd-js": "^1.1.1"
   },
   "devDependencies": {
+    "@types/node": "^16.11.6",
     "typescript": "^4.4.4"
   }
 }

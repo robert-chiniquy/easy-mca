@@ -99,4 +99,6 @@ console.log(MCA(wines, {
     'expert3:fruity': [ true, false ],
     'expert3:buttery': [ true, false ],
     'expert3:woody': [ true, false ]
+}, {
+  correction: true
 }))
