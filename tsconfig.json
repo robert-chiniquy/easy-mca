@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "noImplicitAny": false,
+      "removeComments": false,
+      "preserveConstEnums": true,
+      "target": "ESnext",
+      "declaration": true,
+      "types": []
+    },
+    "files": [
+      "mca.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "./node_modules",
+      "./node_modules/*"
+    ]
+  }

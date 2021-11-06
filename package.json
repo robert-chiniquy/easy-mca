@@ -1,0 +1,37 @@
+{
+  "name": "easy-mca",
+  "version": "1.0.0",
+  "description": "Extremely basic multiple correspondence analysis package for categorical data",
+  "main": "mca.js",
+  "scripts": {
+    "test": "tape test/*",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikolalysenko/easy-mca.git"
+  },
+  "keywords": [
+    "multiple",
+    "correspondence",
+    "analysis",
+    "correlation",
+    "pca",
+    "mca",
+    "categorical",
+    "data",
+    "science"
+  ],
+  "author": "Mikola Lysenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikolalysenko/easy-mca/issues"
+  },
+  "homepage": "https://github.com/mikolalysenko/easy-mca#readme",
+  "dependencies": {
+    "svd-js": "^1.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
