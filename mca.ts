@@ -1,7 +1,8 @@
 import { fixedSVD } from './svd-fix'
 
 export interface MCAOptions {
-    correction:boolean
+    skipBenzecri:boolean
+    skipGreenacre:boolean
     tolerance:number
     numComponents:number
 
@@ -21,6 +22,14 @@ function invSqrt (x:number) {
         return 1 / Math.sqrt(x)
     }
     return 0
+}
+
+function sumPow4 (x:number[]) {
+    let result = 0
+    for (let i = 0; i < x.length; ++i) {
+        result += Math.pow(x[i], 4)
+    }
+    return result
 }
 
 export function MCA<
@@ -96,27 +105,29 @@ export function MCA<
     }
 
     // run svd
-    const { P, s, Q } = fixedSVD(Z, options?.epsilon || 1e-4, options?.svdTolerance || 0)
+    const { P, s, Q } = fixedSVD(Z, options?.epsilon || 0, options?.svdTolerance || 0)
 
     // run correction on eigenvalues
-    const correction = options?.correction
+    const correction = !options?.skipBenzecri
     const K = columnKeys.length
     let E:number[]
     if (correction) {
-        E = s.map(lambda => {
-            if (lambda < 1 / K) {
+        const w = K / (K - 1)
+        const invK = 1 / K
+        E = s.map(x => {
+            const lambda = Math.pow(x, 2)
+            if (lambda < invK) {
                 return 0
             }
-            return Math.pow(K / (K - 1) * (lambda - 1 / K), 2)
+            return Math.pow(w * (lambda - invK), 2)
         })
     } else {
         E = s.map(x => Math.pow(x, 2))
     }
 
-    // compute rank and inertia
+    // remove insignificant factors (trim rank) and compute normalization factor (inertia)
     let inertia = 0
     let rank = 0
-
     const maxRank = options?.numComponents || Infinity
     const tolerance = options?.tolerance || 1e-4
     for (let i = 0; i < E.length; ++i) {
@@ -134,14 +145,19 @@ export function MCA<
     const L = E.slice(0, rank)
 
     // calculate explained variance
-    const explainedVariance = L.map(x => x / inertia)
+    let denom = inertia
+    if (correction && !options?.skipGreenacre) {
+        const J = Z[0].length
+        denom = (K / (K - 1.) * (sumPow4(s) - (J - K) / Math.pow(K, 2)))
+    }
+    const explainedVariance = L.map(x => x / denom)
 
     // calculate projection onto factor space
     let S = L
     if (correction) {
         S = L.map((x) => -Math.sqrt(x))
     }
-    const factorScores = D_r.map((dr, i) => {
+    const factorScores = D_invR.map((dr, i) => {
         return S.map((lambda, j) => {
             return dr * lambda * P[i][j] 
         })

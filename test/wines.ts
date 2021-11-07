@@ -98,8 +98,10 @@ console.log(MCA(wines, {
     'expert2:woody': [ true, false ],
     'expert3:fruity': [ true, false ],
     'expert3:buttery': [ true, false ],
-    'expert3:woody': [ true, false ]
+    'expert3:woody': [ true, false ],
+    'oak': [1, 2]
 }, {
+  skipBenzecri: true,
   svdTolerance: 1e-4
 }))
 
@@ -113,7 +115,6 @@ console.log(MCA(wines, {
   'expert2:woody': [ true, false ],
   'expert3:fruity': [ true, false ],
   'expert3:buttery': [ true, false ],
-  'expert3:woody': [ true, false ]
-}, {
-  correction: true
+  'expert3:woody': [ true, false ],
+  'oak': [1, 2]
 }))

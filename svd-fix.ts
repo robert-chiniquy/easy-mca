@@ -23,11 +23,16 @@ function permute<T> (x:T[], perm:number[]) {
 // have to transpose inputs in case where there are more columns than rows :|
 function runSVD (A:number[][], epsilon:number) {
     if (A[0].length <= A.length) {
-        return SVD(A, true, true, epsilon)
+        const {u, q, v} = SVD(A, true, true, epsilon)
+        return {
+            u: transpose(u), 
+            q,
+            v
+        }
     }
     const { u, q, v } = SVD(transpose(A), true, true, epsilon)
     return {
-        u: transpose(v),
+        u: v,
         q,
         v: transpose(u)
     }
@@ -47,7 +52,21 @@ function formatMatrix (M:number[][], tol:number) {
     return `[${M.map((r) => `[${r.map(x => x.toFixed(precision)).join(', ')}]`).join(',\n  ')}]`
 }
 
+function checkNan (x:number[][]) {
+    for (let i = 0; i < x.length; ++i) {
+        for (let j = 0; j < x[i].length; ++j) {
+            if (isNaN(x[i][j])) {
+                throw new Error('SVD.js failed, NaN output')
+            }
+        }
+    }
+}
+
 function checkSVD (expected:number[][], P:number[][], s:number[], Q:number[][], tolerance:number) {
+    checkNan(P)
+    checkNan([s])
+    checkNan(Q)
+
     const actual:number[][] = []
     for (let i = 0; i < P.length; ++i) {
         const row:number[] = []
@@ -64,7 +83,7 @@ function checkSVD (expected:number[][], P:number[][], s:number[], Q:number[][], 
     for (let i = 0; i < expected.length; ++i) {
         for (let j = 0; j < expected[i].length; ++j) {
             if (Math.abs(expected[i][j] - actual[i][j]) > tolerance) {
-                console.log(`Expected:\n ${formatMatrix(expected, tolerance)}\nActual:\n ${formatMatrix(actual, tolerance)}`)
+                console.error(`Catastrophic failure in SVD-js subroutine.\nExpected Z=\n ${formatMatrix(expected, tolerance)}\nActual P*s*Q=\n ${formatMatrix(actual, tolerance)}`)
                 throw new Error(`SVD computation failed.  Expected: ${expected[i][j]}, got: ${actual[i][j]} for entry ${i}, ${j}.  This could be a bug in SVD.js`)
             }        
         }
@@ -80,7 +99,6 @@ export function fixedSVD (A:number[][], epsilon:number, checkFactor:number) {
     let P = u
     let Q = v
     if (!isSorted(q)) {
-        console.log('fixing sort order', q)
         const sortedEigs = q.map((x, i) => [x, i]).sort((a, b) =>
             Math.abs(b[0]) - Math.abs(a[0])
         )
