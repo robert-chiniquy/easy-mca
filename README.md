@@ -4,7 +4,7 @@ Module for using [multiple correspondence analysis](https://en.wikipedia.org/wik
 
 ## Example
 
-```
+```js
 import MCA from 'easy-mca'
 
 // See test folder for data
