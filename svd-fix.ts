@@ -2,7 +2,7 @@
 import { SVD } from 'svd-js'
 
 // transpose an array-of-arrays type matrix
-function transpose (x:number[][]) {
+export function transpose (x:number[][]) {
     const result:number[][] = []
     for (let i = 0; i < x[0].length; ++i) {
         const row:number[] = []

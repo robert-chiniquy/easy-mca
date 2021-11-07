@@ -1,4 +1,5 @@
 import { MCA } from "../mca"
+import * as util from 'util'
 
 // adapted from here: http://vxy10.github.io/2016/06/10/intro-MCA/
 const wines = [
@@ -89,7 +90,7 @@ const wines = [
   ]
   
 console.log('basic')
-console.log(MCA(wines, {
+console.log(util.inspect(MCA(wines, {
     'expert1:fruity': [ true, false ],
     'expert1:woody': [ 1, 2, 3 ],
     'expert2:fruity': [ true, false ],
@@ -103,10 +104,10 @@ console.log(MCA(wines, {
 }, {
   skipBenzecri: true,
   svdTolerance: 1e-4
-}))
+}), { depth: Infinity, colors: true }))
 
 console.log('corrected')
-console.log(MCA(wines, {
+console.log(util.inspect(MCA(wines, {
   'expert1:fruity': [ true, false ],
   'expert1:woody': [ 1, 2, 3 ],
   'expert2:fruity': [ true, false ],
@@ -117,4 +118,4 @@ console.log(MCA(wines, {
   'expert3:buttery': [ true, false ],
   'expert3:woody': [ true, false ],
   'oak': [1, 2]
-}))
+}), { depth: Infinity, colors: true }))

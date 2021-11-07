@@ -1,4 +1,4 @@
-import { fixedSVD } from './svd-fix'
+import { fixedSVD, transpose } from './svd-fix'
 
 export interface MCAOptions {
     skipBenzecri:boolean
@@ -16,6 +16,17 @@ type MCARow<Categories extends {
 }> = {
     [Name in keyof Categories]:Categories[Name][number]
 }
+
+type MCAWeights<Categories extends {
+    [Name:string|symbol|number]:[...unknown[]]
+}> = Partial<{
+    [Name in keyof Categories]:Partial<{
+        [Category in (
+            Categories[Name][number] extends (string|number|symbol)
+                ? Categories[Name][number]
+                : (string|number|symbol))]:number
+    }>
+}>
 
 function invSqrt (x:number) {
     if (x > 1e-6) {
@@ -157,14 +168,46 @@ export function MCA<
     if (correction) {
         S = L.map((x) => -Math.sqrt(x))
     }
-    const factorScores = D_invR.map((dr, i) => {
-        return S.map((lambda, j) => {
-            return dr * lambda * P[i][j] 
-        })
+
+    // row factor score
+    const rowFactorScores = D_invR.map((dr, i) =>
+        S.map((lambda, j) =>
+            dr * lambda * P[i][j] 
+        )
+    )
+
+    // column factor scores
+    const columnFactorScores = D_invC.map((dc, j) => 
+        S.map((lambda, i) => 
+            dc * lambda * Q[i][j]
+        )
+    )
+
+    const weights = transpose(columnFactorScores).map((row) => {
+        let ptr = 0
+        const result:MCAWeights<Categories> = {}
+        for (let i = 0; i < columnKeys.length; ++i) {
+            const key = columnKeys[i]
+            const cats = columnCategories[i]
+            const entry:any = {}
+            let sum = 0
+            for (let j = 0; j < cats.length; ++j) {
+                const v = row[ptr++]
+                if (Math.abs(v) > tolerance) {
+                    entry[cats[j]] = v
+                    sum += Math.abs(v)
+                }
+            }
+            if (sum > tolerance) {
+                result[key] = entry
+            }
+        }
+        return result
     })
 
     return {
-        factorScores,
+        columnFactors: weights,
+        rowFactors: rowFactorScores,
         explainedVariance,
     }
 }
