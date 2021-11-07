@@ -1,9 +1,13 @@
-import { SVD } from 'svd-js'
-    
+import { fixedSVD } from './svd-fix'
+
 export interface MCAOptions {
     correction:boolean
-    epsilon:number
     tolerance:number
+    numComponents:number
+
+    // pass in a value here to do a self integrity check on SVD-js.  if > 0, then do a sanity check
+    svdTolerance:number
+    epsilon:number
 }
 
 type MCARow<Categories extends {
@@ -17,31 +21,6 @@ function invSqrt (x:number) {
         return 1 / Math.sqrt(x)
     }
     return 0
-}
-
-function transpose (x:number[][]) {
-    const result:number[][] = []
-    for (let i = 0; i < x[0].length; ++i) {
-        const row:number[] = []
-        for (let j = 0; j < x.length; ++j) {
-            row.push(x[j][i])
-        }
-        result.push(row)
-    }
-    return result
-}
-
-// svd-js is annoying and doesn't work with wide matrices.  have to transpose then invert transpose
-function reallyDoTheSVD (A:number[][], epsilon:number) {
-    if (A[0].length <= A.length) {
-        return SVD(A, true, true, epsilon)
-    }
-    const { u, q, v } = SVD(transpose(A), true, true, epsilon)
-    return {
-        u: transpose(v),
-        q,
-        v: transpose(u)
-    }
 }
 
 export function MCA<
@@ -117,8 +96,7 @@ export function MCA<
     }
 
     // run svd
-    const epsilon = options?.epsilon || 0
-    const { u: P, q: s } = reallyDoTheSVD(Z, epsilon)
+    const { P, s, Q } = fixedSVD(Z, options?.epsilon || 1e-4, options?.svdTolerance || 0)
 
     // run correction on eigenvalues
     const correction = options?.correction
@@ -138,15 +116,18 @@ export function MCA<
     // compute rank and inertia
     let inertia = 0
     let rank = 0
+
+    const maxRank = options?.numComponents || Infinity
     const tolerance = options?.tolerance || 1e-4
     for (let i = 0; i < E.length; ++i) {
-        inertia += E[i]
-        if (E[i] > tolerance) {
-            rank += 1
+        if (E[i] < tolerance || i >= maxRank) {
+            rank = i
+            break
         }
+        inertia += E[i]
     }
     if (!rank) {
-        rank = E.length
+        rank = Math.min(E.length, maxRank)
     }
 
     // trim to smaller eigen vectors

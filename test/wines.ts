@@ -88,7 +88,7 @@ const wines = [
     }
   ]
   
-
+console.log('basic')
 console.log(MCA(wines, {
     'expert1:fruity': [ true, false ],
     'expert1:woody': [ 1, 2, 3 ],
@@ -99,6 +99,21 @@ console.log(MCA(wines, {
     'expert3:fruity': [ true, false ],
     'expert3:buttery': [ true, false ],
     'expert3:woody': [ true, false ]
+}, {
+  svdTolerance: 1e-4
+}))
+
+console.log('corrected')
+console.log(MCA(wines, {
+  'expert1:fruity': [ true, false ],
+  'expert1:woody': [ 1, 2, 3 ],
+  'expert2:fruity': [ true, false ],
+  'expert2:roasted': [ true, false ],
+  'expert2:vanillin': [ 1, 2, 3 ],
+  'expert2:woody': [ true, false ],
+  'expert3:fruity': [ true, false ],
+  'expert3:buttery': [ true, false ],
+  'expert3:woody': [ true, false ]
 }, {
   correction: true
 }))
