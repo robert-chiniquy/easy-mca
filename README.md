@@ -82,7 +82,7 @@ console.log(MCA(wines, {
 
 ## API
 
-### `const { factorScores, explainedVariance } = MCA(rows, categories, options?)`
+### `const result = MCA(rows, categories, options?)`
 
 Computes a factor score projection for the data set.
 
